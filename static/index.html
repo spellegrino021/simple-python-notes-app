@@ -6,26 +6,187 @@
 <title>Smart Notes</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
-body { font-family: serif; margin: 20px; }
-.app { max-width: 700px; }
-header { margin-bottom: 20px; }
-.ai-badge { font-size: .75rem; }
-.ai-badge.enabled { color: green; }
-.ai-badge.disabled { color: gray; }
-.note-form { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
-.note-form input, .note-form textarea { width: 100%; margin-bottom: 8px; font-family: serif; }
-.note-form textarea { height: 80px; }
-.btn { cursor: pointer; margin-right: 4px; }
-.note-card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-.note-card .content { white-space: pre-wrap; margin: 8px 0; }
-.note-card .meta { font-size: .8rem; color: gray; }
-.note-card .actions { margin-top: 8px; }
-.ai-result { margin-top: 8px; border: 1px solid #ccc; padding: 8px; }
-.ai-result pre { white-space: pre-wrap; font-family: serif; }
-.edit-form input, .edit-form textarea { width: 100%; margin-bottom: 6px; font-family: serif; }
-.edit-form textarea { height: 60px; }
-.spinner { display: inline-block; }
-.spinner::after { content: "Loading..."; }
+:root {
+  --c-bg-1: #6a11cb;
+  --c-bg-2: #2575fc;
+  --c-accent: #ff6b6b;
+  --c-accent-2: #feca57;
+  --c-success: #1dd1a1;
+  --c-info: #54a0ff;
+  --c-warn: #ff9f43;
+  --c-danger: #ee5253;
+  --c-text: #2d3436;
+  --c-muted: #7f8c8d;
+  --c-card: #ffffff;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--c-bg-1) 0%, var(--c-bg-2) 100%);
+  background-attachment: fixed;
+  color: var(--c-text);
+  padding: 32px 16px;
+}
+.app { max-width: 760px; margin: 0 auto; }
+header {
+  background: rgba(255,255,255,0.95);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  border-top: 4px solid var(--c-accent);
+}
+header h1 {
+  margin: 0 0 6px;
+  font-size: 1.9rem;
+  background: linear-gradient(90deg, var(--c-bg-1), var(--c-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+header p { margin: 0; color: var(--c-muted); }
+.ai-badge {
+  display: inline-block;
+  font-size: .7rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 8px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.ai-badge.enabled { background: var(--c-success); color: white; }
+.ai-badge.disabled { background: #dfe6e9; color: var(--c-muted); }
+
+.note-form {
+  background: var(--c-card);
+  border: none;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--c-accent-2);
+}
+.note-form input, .note-form textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-size: .95rem;
+  padding: 10px 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  transition: border-color .2s, box-shadow .2s;
+  background: #fafbfc;
+}
+.note-form input:focus, .note-form textarea:focus {
+  outline: none;
+  border-color: var(--c-bg-2);
+  box-shadow: 0 0 0 3px rgba(37,117,252,0.15);
+  background: white;
+}
+.note-form textarea { height: 90px; resize: vertical; }
+
+.btn {
+  cursor: pointer;
+  margin-right: 6px;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: white;
+  background: var(--c-bg-2);
+  transition: transform .1s, box-shadow .2s, opacity .2s;
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.note-form .btn {
+  background: linear-gradient(135deg, var(--c-bg-1), var(--c-bg-2));
+  padding: 10px 22px;
+}
+.btn-edit { background: var(--c-warn); }
+.btn-delete { background: var(--c-danger); }
+.btn-summarize { background: var(--c-info); }
+.btn-actions { background: var(--c-success); }
+.btn-sentiment { background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2)); color: #fff; }
+.btn-save { background: var(--c-success); }
+.btn-cancel { background: var(--c-muted); }
+
+.note-card {
+  background: var(--c-card);
+  border: none;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-md);
+  border-left: 5px solid var(--c-bg-2);
+  transition: transform .15s ease, box-shadow .2s;
+}
+.note-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
+.note-card:nth-child(5n+1) { border-left-color: var(--c-accent); }
+.note-card:nth-child(5n+2) { border-left-color: var(--c-accent-2); }
+.note-card:nth-child(5n+3) { border-left-color: var(--c-success); }
+.note-card:nth-child(5n+4) { border-left-color: var(--c-info); }
+.note-card:nth-child(5n+5) { border-left-color: var(--c-bg-1); }
+.note-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.note-card h3 { margin: 0 0 4px; color: var(--c-text); }
+.note-card .content { white-space: pre-wrap; margin: 10px 0; line-height: 1.5; }
+.note-card .meta { font-size: .75rem; color: var(--c-muted); text-transform: uppercase; letter-spacing: .5px; }
+.note-card .actions { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ecf0f1; }
+
+.ai-result {
+  margin-top: 12px;
+  border: none;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f5f7ff, #fff5f5);
+  border-radius: 10px;
+  border-left: 3px solid var(--c-accent);
+}
+.ai-result h4 {
+  margin: 0 0 8px;
+  text-transform: capitalize;
+  color: var(--c-bg-1);
+  font-size: .9rem;
+}
+.ai-result pre { white-space: pre-wrap; font-family: inherit; margin: 0; line-height: 1.4; }
+
+.edit-form input, .edit-form textarea {
+  width: 100%;
+  margin-bottom: 8px;
+  font-family: inherit;
+  padding: 10px 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+}
+.edit-form textarea { height: 70px; resize: vertical; }
+.edit-form input:focus, .edit-form textarea:focus {
+  outline: none; border-color: var(--c-bg-2);
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 3px solid #ecf0f1;
+  border-top-color: var(--c-accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#note-list > p {
+  background: rgba(255,255,255,0.95);
+  padding: 24px; border-radius: var(--radius);
+  text-align: center; color: var(--c-muted);
+  box-shadow: var(--shadow-sm);
+}
 </style>
 </head>
 <body>
@@ -80,16 +241,16 @@ function noteCard(n) {
     <div class="note-card-header">
       <h3>${esc(n.title)}</h3>
       <div class="header-btns">
-        <button class="btn" onclick="startEdit('${n.id}')">Edit</button>
-        <button class="btn" onclick="delNote('${n.id}')">Delete</button>
+        <button class="btn btn-edit" onclick="startEdit('${n.id}')">Edit</button>
+        <button class="btn btn-delete" onclick="delNote('${n.id}')">Delete</button>
       </div>
     </div>
     <div class="meta">${date}</div>
     <div class="content">${esc(n.content)}</div>
     <div class="actions">
-      <button class="btn" onclick="aiAction('${n.id}','summarize',this)">Summarize</button>
-      <button class="btn" onclick="aiAction('${n.id}','action_items',this)">Action Items</button>
-      <button class="btn" onclick="aiAction('${n.id}','sentiment',this)">Sentiment</button>
+      <button class="btn btn-summarize" onclick="aiAction('${n.id}','summarize',this)">Summarize</button>
+      <button class="btn btn-actions" onclick="aiAction('${n.id}','action_items',this)">Action Items</button>
+      <button class="btn btn-sentiment" onclick="aiAction('${n.id}','sentiment',this)">Sentiment</button>
     </div>
     <div id="ai-${n.id}"></div>
   </div>`;
@@ -126,8 +287,8 @@ async function startEdit(id) {
     <input id="edit-title-${id}" value="${esc(n.title)}" />
     <textarea id="edit-content-${id}">${esc(n.content)}</textarea>
     <div class="edit-actions">
-      <button class="btn" onclick="saveEdit('${id}')">Save</button>
-      <button class="btn" onclick="loadNotes()">Cancel</button>
+      <button class="btn btn-save" onclick="saveEdit('${id}')">Save</button>
+      <button class="btn btn-cancel" onclick="loadNotes()">Cancel</button>
     </div>
   </div>`;
 }
