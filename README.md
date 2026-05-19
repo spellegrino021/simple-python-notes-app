@@ -31,3 +31,5 @@ Open http://localhost:8008
 - **AI actions** — summarize, extract action items, sentiment analysis (mock by default)
 - **Optional AI** — set `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and `AZURE_OPENAI_DEPLOYMENT` env vars, then uncomment the real implementation in `backend/ai_service.py`
 - **Optional DB** — in-memory storage by default; swap `backend/store.py` for SQLite/Postgres
+
+<!-- pr-testing-2: Docs: tweak features list (2) -->
