@@ -1,0 +1,11 @@
+name: simple-python-notes-app
+components:
+  - name: app
+    role: web
+    platform: python
+    platformVersion: "3.14"
+    path: /
+    run:
+      port: 8080
+      start: gunicorn --bind 0.0.0.0:8080 application:app
+      healthCheckPath: /api/health
